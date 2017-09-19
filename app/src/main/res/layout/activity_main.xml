@@ -43,14 +43,18 @@
             android:layout_weight="1"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="보호사로그인"
+            android:background="#ffcc00"
+            android:textColor="#ffffff"
+            android:text="로그인"
             android:id="@+id/btn1" />
 
         <Button
             android:layout_weight="1"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="보호자로그인"
+            android:background="#ffcc00"
+            android:textColor="#ffffff"
+            android:text="대상자로그인"
             android:id="@+id/btn2" />
 
     </LinearLayout>

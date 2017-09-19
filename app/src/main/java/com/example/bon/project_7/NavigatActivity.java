@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -15,34 +17,50 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
+
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class NavigatActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    Button logut;
+    private BackPressCloseHandler backPressCloseHandler;
+
+    TabLayout tabLayout;
+    ViewPager viewPager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.drawer_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        backPressCloseHandler = new BackPressCloseHandler(this);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+
+        tabLayout = (TabLayout) findViewById(R.id.tab_layout);
 
         tabLayout.addTab(tabLayout.newTab().setText("매칭 목록").setIcon(android.R.drawable.ic_lock_idle_charging));
         tabLayout.addTab(tabLayout.newTab().setText("업무 일지").setIcon(android.R.drawable.ic_menu_report_image));
         tabLayout.addTab(tabLayout.newTab().setText("근무 일정").setIcon(android.R.drawable.ic_menu_my_calendar));
         tabLayout.addTab(tabLayout.newTab().setText("사진 목록").setIcon(android.R.drawable.ic_menu_camera));
-        tabLayout.addTab(tabLayout.newTab().setText("GPS 위치").setIcon(android.R.drawable.ic_dialog_alert));
+
 //        tabLayout.addTab(tabLayout.newTab().setText("업무 일지"));
 //        tabLayout.addTab(tabLayout.newTab().setText("근무 일정"));
 //        tabLayout.addTab(tabLayout.newTab().setText("사진 목록"));
 //        tabLayout.addTab(tabLayout.newTab().setText("GPS 위치"));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
-        final ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
-        final PagerAdapter adapter = new PagerAdapter
-                (getSupportFragmentManager(), tabLayout.getTabCount());
-        viewPager.setAdapter(adapter);
+        viewPager = (ViewPager) findViewById(R.id.pager);
+        viewPager.setOffscreenPageLimit(3);
+//        adapter = new PagerAdapter
+//                (getSupportFragmentManager(), tabLayout.getTabCount());
+//        viewPager.setAdapter(adapter);
+        setChangeAdapter();
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -61,6 +79,7 @@ public class NavigatActivity extends AppCompatActivity
             }
         });
 
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -70,17 +89,33 @@ public class NavigatActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        FirebaseMessaging.getInstance().subscribeToTopic("news");
+        FirebaseInstanceId.getInstance().getToken();
+
+
     }
 
+
+    //    @Override
+//    public void onBackPressed() {
+//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+//        if (drawer.isDrawerOpen(GravityCompat.START)) {
+//            drawer.closeDrawer(GravityCompat.START);
+//        } else {
+//            super.onBackPressed();
+//        }
+//    }
+    private void setChangeAdapter() {
+        PagerAdapter adapter = new PagerAdapter
+                (getSupportFragmentManager(), tabLayout.getTabCount());
+        viewPager.setAdapter(adapter);
+    }
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
+//        super.onBackPressed();
+        backPressCloseHandler.onBackPressed();
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -95,17 +130,48 @@ public class NavigatActivity extends AppCompatActivity
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        if (id == R.id.logout) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Logout();
-                    Log.i("asdasdasdas", "Asdasdasd");
-                }
-            }).start();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
             return true;
         }
+
+//        if (id == R.id.logout) {
+//            Logout();
+////            new Thread(new Runnable() {
+////                @Override
+////                public void run() {
+////
+////                    Log.i("asdasdasdas", "Asdasdasd");
+////                }
+////            }).start();
+//            return true;
+//        }
         return super.onOptionsItemSelected(item);
+    }
+//    @Override
+//    protected void onStart() {
+//        super.onStart();
+////        adapter.notifyDataSetChanged();
+//        adapter = new PagerAdapter
+//                (getSupportFragmentManager(), tabLayout.getTabCount());
+//        viewPager.setAdapter(adapter);
+//        viewPager.setCurrentItem(2);
+//        Log.e("실행이 되는지", "onStart");
+//
+//    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+//        adapter.notifyDataSetChanged();
+//        adapter = new PagerAdapter
+//                (getSupportFragmentManager(), tabLayout.getTabCount());
+//        viewPager.setAdapter(adapter);
+        setChangeAdapter();
+        viewPager.setCurrentItem(2);
+        Log.e("실행이 되는지", "onActivityResult");
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -114,17 +180,30 @@ public class NavigatActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+//        logut = (Button)findViewById(R.id.logout);
+//
+//        logut.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Logout();
+//
+//            }
+//
+//        });
+
+        if (id == R.id.nav_home) {
+            Intent intent = new Intent(NavigatActivity.this, NavigatActivity.class);
+            startActivity(intent);
             // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.nav_profile) {
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.nav_center) {
 
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.nav_logout) {
+            Logout();
+        } else if (id == R.id.nav_notice) {
 
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.nav_query) {
 
         }
 
@@ -134,17 +213,16 @@ public class NavigatActivity extends AppCompatActivity
     }
 
     public void Logout() {
-
-        Intent intent = new Intent(NavigatActivity.this, ExplanationActivity.class);
-        startActivity(intent);
-
         SharedPreferences auto = getSharedPreferences("auto", Activity.MODE_PRIVATE);
         SharedPreferences.Editor editor = auto.edit();
         //editor.clear()는 auto에 들어있는 모든 정보를 기기에서 지웁니다.
         editor.clear();
         editor.commit();
-        if (editor == null)
-            Toast.makeText(NavigatActivity.this, "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(NavigatActivity.this, "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show();
+
+        Intent intent = new Intent(NavigatActivity.this, ExplanationActivity.class);
+        startActivity(intent);
+        finish();
     }
 
 

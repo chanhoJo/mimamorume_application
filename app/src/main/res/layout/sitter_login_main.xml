@@ -37,6 +37,8 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#ffcc00"
+        android:textColor="#ffffff"
         android:text="로그인"
         android:id="@+id/btnLogin"
         android:layout_below="@+id/loginPass"/>
